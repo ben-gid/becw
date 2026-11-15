@@ -14,11 +14,9 @@ document.getElementById('nav').addEventListener('click', e => {
   }
 });
 
-// --- Hero: open-now chip + mute toggle --------------------------------------
-// Store hours are 7:00am, closing 7:00pm or 7:30pm depending on the site.
-// The chip reports the group hours; each location card carries its own close time.
+// --- Open-now status: hero chip + each location card ------------------------
+// Every site opens at 7:00am; each card's data-close holds its own closing time.
 const OPEN_MIN = 7 * 60;
-const CLOSE_MIN = 19 * 60 + 30;
 
 function laMinutes() {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -28,16 +26,29 @@ function laMinutes() {
   return (get('hour') % 24) * 60 + get('minute');
 }
 
-const chip = document.getElementById('openNow');
 const now = laMinutes();
-if (now >= OPEN_MIN && now < CLOSE_MIN) {
-  chip.classList.add('is-open');
-  chip.textContent = 'Open now until 7:30pm';
-} else {
-  chip.textContent = 'Closed · opens 7:00am';
+const locCards = [...document.querySelectorAll('.loc')];
+let openCount = 0;
+for (const card of locCards) {
+  const [h, m] = card.dataset.close.split(':').map(Number);
+  const open = now >= OPEN_MIN && now < h * 60 + m;
+  if (open) openCount++;
+  const status = document.createElement('b');
+  status.className = 'loc__open' + (open ? ' is-open' : '');
+  status.textContent = open ? 'Open now' : 'Closed now';
+  card.querySelector('.loc__hours').prepend(status, ' · ');
 }
 
+const chip = document.getElementById('openNow');
+chip.classList.toggle('is-open', openCount > 0);
+chip.textContent =
+  openCount === locCards.length ? 'All locations open now' :
+  openCount > 0 ? `${openCount} of ${locCards.length} locations open now` :
+  'Closed now · opens 7:00am';
+
+// --- Hero video: mute toggle ------------------------------------------------
 const video = document.getElementById('heroVideo');
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) video.pause();
 const mute = document.getElementById('mute');
 mute.addEventListener('click', () => {
   video.muted = !video.muted;
@@ -97,7 +108,8 @@ document.getElementById('findNearest').addEventListener('click', () => {
 });
 
 // --- Forms ------------------------------------------------------------------
-// No backend yet: validate, then hand the visitor a phone number that works today.
+// No backend yet: validate, then say plainly nothing was sent and keep what they
+// typed, so they can copy it or call. Replace this block when a backend exists.
 for (const form of document.querySelectorAll('.form')) {
   form.addEventListener('submit', e => {
     e.preventDefault();
@@ -107,9 +119,8 @@ for (const form of document.querySelectorAll('.form')) {
       status.textContent = 'Check the highlighted fields and try again.';
       return;
     }
-    status.dataset.state = 'ok';
-    status.textContent = 'Thanks — we received it. Need us sooner? Call (332) 232-2316.';
-    form.reset();
+    status.dataset.state = 'error';
+    status.textContent = 'Online sending isn’t set up yet, so this wasn’t sent. Please call us at (332) 232-2316.';
   });
 }
 

@@ -138,7 +138,11 @@ p:last-child { margin-bottom: 0; }
 .topbar__strip a { color: var(--steel); text-decoration: none; }
 .topbar__strip a:hover { color: var(--chrome); }
 .topbar__tel { color: var(--jet) !important; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
-@media (max-width: 720px) { .topbar__util a:not(.topbar__tel) { display: none; } }
+@media (max-width: 720px) {
+  /* Keep the sticky bar to one line on phones; the hero chip shows open status. */
+  .topbar__util a:not(.topbar__tel), .topbar__hours { display: none; }
+  .topbar__strip .wrap { justify-content: flex-end; }
+}
 
 .topbar__main {
   display: flex; align-items: center; gap: 1.5rem;
@@ -249,6 +253,8 @@ body.nav-open .burger span:nth-child(3) { transform: translateY(-6px) rotate(-45
 }
 .mute svg { width: 22px; height: 22px; fill: none; stroke: var(--chrome); stroke-width: 2; stroke-linecap: round; }
 .mute[aria-pressed="false"] line { display: none; }
+/* On phones the stacked hero buttons reach the bottom corner, so move up top. */
+@media (max-width: 720px) { .mute { bottom: auto; top: 1.25rem; } }
 
 /* ==========================================================================
    Passes
@@ -445,6 +451,8 @@ body.nav-open .burger span:nth-child(3) { transform: translateY(-6px) rotate(-45
 }
 .loc__addr { margin: 0; font-size: 1.05rem; font-weight: 500; }
 .loc__hours { margin: 0; color: #4d6a7c; font-size: .95rem; }
+.loc__open { font-weight: 600; color: #4d6a7c; }
+.loc__open.is-open { color: #137a43; }
 .loc__note { margin: 0; color: #3c5567; font-size: .98rem; }
 .loc__links { display: flex; flex-wrap: wrap; gap: 1.25rem; margin: .4rem 0 0; padding-top: .4rem; }
 .loc__note { margin-bottom: auto; }
